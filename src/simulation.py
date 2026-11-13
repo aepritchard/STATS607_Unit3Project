@@ -119,6 +119,7 @@ class SimulationStudy:
                 method_class = METHOD_CLASSES[model]
                 start = perf_counter()
                 failure_reason = ""
+                error_message = ""
 
                 with warnings.catch_warnings(record=True) as caught:
                     warnings.simplefilter('always')
@@ -130,9 +131,18 @@ class SimulationStudy:
                                      "beta3_hat": np.nan, "plug_in": np.nan,
                                      "itt": np.nan}
                         failure_reason = type(error).__name__
+                        error_message = str(error)
+
+               
 
                 if failure_reason == "" and len(caught) > 0:
                     failure_reason = "warning: " + type(caught[0].message).__name__
+
+                # Every warning raised in this rep (including any before an exception)
+                warning_messages = []
+                for caught_warning in caught:
+                    warning_messages.append(f"{type(caught_warning.message).__name__}: {caught_warning.message}")
+                warning_text = " | ".join(warning_messages)
 
                 row = {
                     "study_id": self.study_id,
@@ -144,11 +154,14 @@ class SimulationStudy:
                     "pi_treat": settings["pi_treat"],
                     "true_delta": true_deltas[model],
                     "failure_reason": failure_reason,
+                    "error_message": error_message,
+                    "n_warnings": len(caught),
+                    "warnings": warning_text,
                     "seconds": perf_counter() - start,
                 }
                 row.update(estimates)
                 rows.append(row)
-
+                
         frame = pd.DataFrame(rows)
         save_csv(frame, checkpoint)
         logging.info("Completed %s (%d reps)", scenario_id, self.n_sim)

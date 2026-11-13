@@ -8,5 +8,5 @@ from simulation import SimulationStudy
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
-study = SimulationStudy(SCENARIOS)
+study = SimulationStudy(SCENARIOS, label="baseline")
 study.run()
