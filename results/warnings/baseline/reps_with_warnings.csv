@@ -1,0 +1,4 @@
+experiment,pi_treat,model,n_sample,n_reps_with_warnings
+e3_cutoffs,0.75,logit,100,529
+e4_covariate,0.75,logit,100,4
+e5_joint_dist,0.75,logit,100,15

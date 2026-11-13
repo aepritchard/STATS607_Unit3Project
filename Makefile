@@ -37,6 +37,10 @@ profile:
 complexity:
 	PYTHONPATH=src python3 complexity_study.py
 
+# Numerical stability (warnings and errors for numerical/convergence problems)
+stability:
+	PYTHONPATH=src python3 stability_study.py
+
 # Remove generated files
 clean:
 	rm -rf results/raw results/tables results/figures

@@ -45,9 +45,9 @@ class SimulationStudy:
     '''
 
     def __init__(self, scenarios, n_sim=1000, seed=607,
-                 out_dir="results/raw"):
+                 out_dir="results/raw", label="baseline"):
         self.scenarios, self.n_sim, self.seed = scenarios, n_sim, seed
-        self.out_dir = Path(out_dir)
+        self.out_dir = Path(out_dir) / label
 
         # Everything that defines the study; any change gives a new study_id
         src_dir = Path(__file__).resolve().parent
@@ -161,7 +161,7 @@ class SimulationStudy:
                 }
                 row.update(estimates)
                 rows.append(row)
-                
+
         frame = pd.DataFrame(rows)
         save_csv(frame, checkpoint)
         logging.info("Completed %s (%d reps)", scenario_id, self.n_sim)

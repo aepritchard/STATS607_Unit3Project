@@ -1,0 +1,7 @@
+experiment,pi_treat,model,n_sample,warning,count
+e3_cutoffs,0.75,logit,100,ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals,529
+e4_covariate,0.75,logit,100,ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals,3
+e4_covariate,0.75,logit,100,RuntimeWarning: divide by zero encountered in log,2
+e4_covariate,0.75,logit,100,RuntimeWarning: invalid value encountered in divide,4
+e4_covariate,0.75,logit,100,RuntimeWarning: overflow encountered in exp,70
+e5_joint_dist,0.75,logit,100,ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals,15

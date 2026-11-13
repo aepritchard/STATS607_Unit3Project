@@ -1,0 +1,4 @@
+experiment,pi_treat,model,n_sample,failure_reason,error_message,count
+e3_cutoffs,0.75,logit,100,ValueError,"p must be in (0,1), recieved 0.0",529
+e4_covariate,0.75,logit,100,LinAlgError,Singular matrix,1
+e5_joint_dist,0.75,logit,100,ValueError,"p must be in (0,1), recieved 0.0",15
