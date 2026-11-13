@@ -27,6 +27,14 @@ figures:
 test:
 	PYTHONPATH=src python3 -m pytest tests/
 
+# Profile one experiment, time entire study
+profile:
+	PYTHONPATH=src python3 profile_study.py
+
+# Runtime vs sample size
+complexity:
+	PYTHONPATH=src python3 complexity_study.py
+
 # Remove generated files
 clean:
 	rm -rf results/raw results/tables results/figures

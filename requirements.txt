@@ -6,3 +6,5 @@ threadpoolctl
 tqdm
 pytest
 matplotlib
+pyinstrument
+time
