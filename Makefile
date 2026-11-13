@@ -42,9 +42,9 @@ stability:
 	PYTHONPATH=src python3 stability_study.py $(LABEL)
 
 # Remove generated files
-clean_baseline:
-	rm -rf results/raw/baseline results/tables/baseline results/figures/baseline
-	rm -f .*complete
+# clean_baseline:
+#	rm -rf results/raw/baseline results/tables/baseline results/figures/baseline
+#	rm -f .*complete
 
 clean_optimized:
 	rm -rf results/raw/optimized results/tables/optimized results/figures/optimized
