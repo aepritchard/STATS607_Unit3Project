@@ -2,4 +2,4 @@ label: baseline
 n_scenarios: 28
 n_sim: 1000
 total_seconds: 25.5
-total_minutes: 0.43
+total_minutes: 0.42
