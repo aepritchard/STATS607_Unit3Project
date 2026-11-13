@@ -14,7 +14,7 @@ The largest bottle necks are the model fitting. Both the probit and logit model 
 While the overall simulation study took very little time to run, this is partially due to the small sample sizes used.
 Adding larger values of n increased the run time for all experiments, and the run time by n did not vary strongly between experiments.
 
-*see results/complexity*
+*see results/complexity for a log-log figure and table of run times by n for each experiment*
 
 # Numerical Warnings
 
