@@ -1,0 +1,35 @@
+
+  _     ._   __/__   _ _  _  _ _/_   Recorded: 12:29:58  Samples:  4342
+ /_//_/// /_\ / //_// / //_'/ //     Duration: 4.404     CPU time: 4.401
+/   _/                      v5.1.3
+
+Profile at /Users/aeprit/Documents/STATS607/STATS607_Unit3Project/profile_study.py:29
+
+4.403 profile_experiment_1  profile_study.py:20
+└─ 4.403 SimulationStudy.run  simulation.py:157
+   └─ 4.374 SimulationStudy.run_scenario  simulation.py:75
+      ├─ 4.296 Methods_probit.run_methods  methods.py:83
+      │  ├─ 2.199 Methods_probit.fit_model  methods.py:133
+      │  │  ├─ 2.020 Probit.fit  statsmodels/discrete/discrete_model.py:3152
+      │  │  │     [35 frames hidden]  statsmodels, scipy, numpy
+      │  │  └─ 0.169 Probit.__init__  statsmodels/discrete/discrete_model.py:540
+      │  │        [12 frames hidden]  statsmodels, numpy, <built-in>
+      │  ├─ 1.652 Methods_logit.fit_model  methods.py:112
+      │  │  ├─ 1.478 Logit.fit  statsmodels/discrete/discrete_model.py:2834
+      │  │  │     [27 frames hidden]  statsmodels, numpy
+      │  │  └─ 0.157 Logit.__init__  statsmodels/discrete/discrete_model.py:540
+      │  │        [12 frames hidden]  statsmodels, numpy, scipy
+      │  ├─ 0.306 Methods_probit.plug_in_estimator  methods.py:59
+      │  │  ├─ 0.224 Methods_probit.p  methods.py:43
+      │  │  │  ├─ 0.146 inverse_link  methods.py:129
+      │  │  │  │  └─ 0.146 norm_gen.cdf  scipy/stats/_distn_infrastructure.py:2135
+      │  │  │  │        [2 frames hidden]  scipy
+      │  │  │  └─ 0.068 inverse_link  methods.py:108
+      │  │  └─ 0.066 link  methods.py:124
+      │  │     └─ 0.066 norm_gen.ppf  scipy/stats/_distn_infrastructure.py:2305
+      │  └─ 0.137 Methods_probit.itt_estimate  methods.py:72
+      │     ├─ 0.077 link  methods.py:124
+      │     │  └─ 0.077 norm_gen.ppf  scipy/stats/_distn_infrastructure.py:2305
+      │     └─ 0.049 [self]  methods.py
+      └─ 0.047 DGP_Uniform.generate_repetitions  dgps.py:75
+
