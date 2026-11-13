@@ -4,7 +4,7 @@ Each key is a unique, filename-safe scenario ID (also used to derive its random 
 Each value holds the settings run_scenario reads
 '''
 
-make_scenarios_for_all_n_samples = [100, 500, 1000, 5000]
+n_samples = [100, 500, 1000, 5000]
 
 # Define baseline scenarios
 BASELINE = {
