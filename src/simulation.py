@@ -44,8 +44,8 @@ class SimulationStudy:
     Using the scenario dictionary, run the simulation
     '''
 
-    def __init__(self, scenarios, n_sim=1000, seed=607,
-                 out_dir="results/raw", label="baseline"):
+    def __init__(self, scenarios, label, n_sim=1000, seed=607,
+                 out_dir="results/raw"):
         self.scenarios, self.n_sim, self.seed = scenarios, n_sim, seed
         self.out_dir = Path(out_dir) / label
 

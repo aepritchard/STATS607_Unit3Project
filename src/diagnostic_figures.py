@@ -13,6 +13,13 @@ from metrics import get_valid_reps
 from figure_settings import (N_SAMPLES, CONDITIONS, SEPARATE_SCALE_EXPERIMENT, ESTIMATOR_STYLES, DPI,
                              select_condition, remove_top_right_spines, set_shared_y_limits)
 
+import sys
+# Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
+if len(sys.argv) > 1:
+    LABEL = sys.argv[1]
+else:
+    LABEL = "baseline"
+
 def running_bias(estimates, true_delta):
     '''
     Calculates running mean of estimator bias by number of repeitions
@@ -70,7 +77,7 @@ def plot_running_bias(runs, out_dir, n_sample = 5000):
     fig.savefig(Path(out_dir) / "running_bias_n5000.png", dpi=DPI, bbox_inches="tight")
     plt.close(fig)
 
-def run_diagnostic_figures(label="baseline", raw_dir="results/raw", figures_dir="results/figures"):
+def run_diagnostic_figures(label=LABEL, raw_dir="results/raw", figures_dir="results/figures"):
     '''
     Reads raw results, creates diagnostic figures
     '''

@@ -6,6 +6,13 @@ ESTIMATORS = ["beta1_hat", "beta2_hat", "beta3_hat", "plug_in", "itt"]
 DELTA_ESTIMATORS = ["beta2_hat", "plug_in", "itt"]
 GROUP_COLUMNS = ["scenario_id", "experiment", "model", "n_sample", "pi_treat"]
 
+import sys
+# Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
+if len(sys.argv) > 1:
+    LABEL = sys.argv[1]
+else:
+    LABEL = "baseline"
+
 def get_valid_reps(group):
     '''
     For a given group, gets repetitions that are valid, counts failures
@@ -170,7 +177,7 @@ def probit_logit_ratio_table(paired):
 
     return pd.DataFrame(rows)
 
-def run_all_metrics(label="baseline", raw_dir="results/raw", tables_dir="results/tables"):
+def run_all_metrics(label=LABEL, raw_dir="results/raw", tables_dir="results/tables"):
     '''
     Reads raw simulation results, computes performance measures, saves summary tables
     '''

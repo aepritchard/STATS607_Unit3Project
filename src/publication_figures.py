@@ -12,6 +12,13 @@ from figure_settings import (N_SAMPLES, CONDITIONS, SEPARATE_SCALE_EXPERIMENT, E
                              N_SAMPLE_COLORS, COEFFICIENT_STYLES,
                              select_condition, remove_top_right_spines, set_shared_y_limits)
 
+import sys
+# Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
+if len(sys.argv) > 1:
+    LABEL = sys.argv[1]
+else:
+    LABEL = "baseline"
+
 def plot_bias_vs_n(performance, out_dir):
     '''
     Plots bias of beta2_hat, delta_tilde, delta_hat vs n
@@ -105,7 +112,7 @@ def plot_probit_vs_logit(paired, out_dir):
     fig.savefig(Path(out_dir) / "probit_vs_logit.png", dpi=DPI, bbox_inches="tight")
     plt.close(fig)
 
-def run_publication_figures(label="baseline", tables_dir="results/tables",
+def run_publication_figures(label=LABEL, tables_dir="results/tables",
                             figures_dir="results/figures"):
     '''
     Reads the summary tables made by make analyze, creates publication-quality figures
