@@ -13,7 +13,14 @@ from simulation import SimulationStudy
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
-LABEL = "baseline"
+import sys
+
+# Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
+if len(sys.argv) > 1:
+    LABEL = sys.argv[1]
+else:
+    LABEL = "baseline"
+    
 PROFILE_DIR = Path("results/profiling")
 
 # Profile experiment 1 w/ n 5000

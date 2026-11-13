@@ -70,12 +70,14 @@ def plot_running_bias(runs, out_dir, n_sample = 5000):
     fig.savefig(Path(out_dir) / "running_bias_n5000.png", dpi=DPI, bbox_inches="tight")
     plt.close(fig)
 
-def run_diagnostic_figures(runs_path="results/raw/runs.csv", out_dir="results/figures"):
+def run_diagnostic_figures(label="baseline", raw_dir="results/raw", figures_dir="results/figures"):
     '''
     Reads raw results, creates diagnostic figures
     '''
+    runs_path = Path(raw_dir) / label / "runs.csv"
+
     # Create output folder
-    out_dir = Path(out_dir)
+    out_dir = Path(figures_dir) / label
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Load raw results

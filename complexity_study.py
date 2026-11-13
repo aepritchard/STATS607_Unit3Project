@@ -15,7 +15,14 @@ import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
-LABEL = "baseline"
+import sys
+
+# Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
+if len(sys.argv) > 1:
+    LABEL = sys.argv[1]
+else:
+    LABEL = "baseline"
+    
 COMPLEXITY_DIR = Path("results/complexity")
 
 ### Make scenarios for complexity analysis

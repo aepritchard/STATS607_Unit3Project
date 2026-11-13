@@ -105,14 +105,16 @@ def plot_probit_vs_logit(paired, out_dir):
     fig.savefig(Path(out_dir) / "probit_vs_logit.png", dpi=DPI, bbox_inches="tight")
     plt.close(fig)
 
-def run_publication_figures(performance_path="results/tables/performance.csv",
-                            paired_path="results/tables/probit_logit_paired.csv",
-                            out_dir="results/figures"):
+def run_publication_figures(label="baseline", tables_dir="results/tables",
+                            figures_dir="results/figures"):
     '''
     Reads the summary tables made by make analyze, creates publication-quality figures
     '''
+    performance_path = Path(tables_dir) / label / "performance.csv"
+    paired_path = Path(tables_dir) / label / "probit_logit_paired.csv"
+
     # Create output folder
-    out_dir = Path(out_dir)
+    out_dir = Path(figures_dir) / label
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Load tables

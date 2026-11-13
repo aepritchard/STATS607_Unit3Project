@@ -1,5 +1,7 @@
 .PHONY: all simulate analyze figures test clean
 
+LABEL ?= baseline
+
 all: setup simulate analyze figures
 
 # Set-up
@@ -16,12 +18,12 @@ simulate:
 
 # Compute performance measures from results/raw/runs.csv
 analyze:
-	PYTHONPATH=src python3 -c "from metrics import run_all_metrics; run_all_metrics()"
+	PYTHONPATH=src python3 -c "from metrics import run_all_metrics; run_all_metrics(label='$(LABEL)')"
 
 # Create all visualizations
 figures:
-	PYTHONPATH=src python3 -c "from publication_figures import run_publication_figures; run_publication_figures()"
-	PYTHONPATH=src python3 -c "from diagnostic_figures import run_diagnostic_figures; run_diagnostic_figures()"
+	PYTHONPATH=src python3 -c "from publication_figures import run_publication_figures; run_publication_figures(label='$(LABEL)')"
+	PYTHONPATH=src python3 -c "from diagnostic_figures import run_diagnostic_figures; run_diagnostic_figures(label='$(LABEL)')"
 
 # Run test suite
 test:

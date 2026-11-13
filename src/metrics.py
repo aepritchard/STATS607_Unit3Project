@@ -170,12 +170,14 @@ def probit_logit_ratio_table(paired):
 
     return pd.DataFrame(rows)
 
-def run_all_metrics(runs_path="results/raw/runs.csv", out_dir="results/tables"):
+def run_all_metrics(label="baseline", raw_dir="results/raw", tables_dir="results/tables"):
     '''
     Reads raw simulation results, computes performance measures, saves summary tables
     '''
+    runs_path = Path(raw_dir) / label / "runs.csv"
+
     # Create output folder
-    out_dir = Path(out_dir)
+    out_dir = Path(tables_dir) / label
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Load raw results
