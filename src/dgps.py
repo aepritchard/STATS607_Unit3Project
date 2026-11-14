@@ -67,9 +67,9 @@ class DGP(ABC):
         '''
         Randomly assign treatment for one simulation repitition
         '''
-        trt_assignment = np.zeros(self.n_sample, dtype=int)
-        treated_index = self.rng.choice(self.n_sample, size=self.n_treat, replace=False)
-        trt_assignment[treated_index] = 1
+        trt_assignment = np.zeros(shape=(self.n_sim, self.n_sample), dtype=int)
+        treated_index = self.rng.random((self.n_sim, self.n_sample)).argsort(axis=1)[:, :self.n_treat]
+        np.put_along_axis(trt_assignment, treated_index, 1, axis=1)
         return trt_assignment
 
     def generate_repetitions(self):
@@ -77,19 +77,14 @@ class DGP(ABC):
         Generate experiements
         '''
         self.generate_outcomes()
+        trt_assignments = self.generate_treatment()
+        Y_observed = trt_assignments * self.Y_treatment + (1 - trt_assignments) * self.Y_control
 
-        all_repetitions = []
-        for sim_index in range(self.n_sim):
-            trt_assignment = self.generate_treatment()
-            Y_observed = trt_assignment * self.Y_treatment + (1-trt_assignment) * self.Y_control
-
-            repetition = {
-                "experiment": self.experiment,
-                "sim_index": sim_index,
-                "trt": trt_assignment,
-                "Y_observed": Y_observed
-            }
-            all_repetitions.append(repetition)
+        all_repetitions = {
+            "experiment": self.experiment,
+            "trt": trt_assignments,
+            "Y_observed": Y_observed
+        }
 
         return all_repetitions
 

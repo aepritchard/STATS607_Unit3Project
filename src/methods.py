@@ -62,8 +62,8 @@ class Methods(ABC):
         Gets average predicted probabilities (eq 10a) to get estimated differential log odds (eq 10b)
         '''
         # Get average predicted probabilities (eq 10a)
-        alpha_tilde_treated = np.mean(self.p(beta_hat, 1, self.covariate_observed))
-        alpha_tilde_control = np.mean(self.p(beta_hat, 0, self.covariate_observed))
+        alpha_tilde_treated = np.mean(self.p(beta_hat, 1, self.covariate_observed), axis=1)
+        alpha_tilde_control = np.mean(self.p(beta_hat, 0, self.covariate_observed), axis=1)
 
         # Get estimated differential log odds (eq 10b)
         delta_tilde = self.link(alpha_tilde_treated) - self.link(alpha_tilde_control)
@@ -74,8 +74,8 @@ class Methods(ABC):
         Returns ITT estimator of the differential log odds
         Gets ITT estimators (eq 11a) to get ITT estimated differential log odds (eq 11b)
         '''
-        alpha_treat_hat = np.mean(self.Y_observed[self.trt == 1])
-        alpha_control_hat = np.mean(self.Y_observed[self.trt == 0])
+        alpha_treat_hat = (self.Y_observed * self.trt).sum(axis=1) / self.trt.sum(axis=1)
+        alpha_control_hat = (self.Y_observed * (1 - self.trt)).sum(axis=1) / (1 - self.trt).sum(axis=1)
 
         delta_hat = self.link(alpha_treat_hat) - self.link(alpha_control_hat)
         return delta_hat
