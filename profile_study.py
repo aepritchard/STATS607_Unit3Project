@@ -37,7 +37,7 @@ def profile_experiment_1():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(scenarios_to_profile, label=label, n_workers=N_WORKERS, out_dir = scratch_dir)
+        study = SimulationStudy(scenarios_to_profile, label=label, n_workers=1, out_dir=scratch_dir)
 
         with Profiler() as profiler:
             study.run()
@@ -67,7 +67,7 @@ def time_simulation_study():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(SCENARIOS, label=label, out_dir=scratch_dir)
+        study = SimulationStudy(SCENARIOS, label=label, n_workers=N_WORKERS, out_dir=scratch_dir)
 
         start = perf_counter()
         study.run()

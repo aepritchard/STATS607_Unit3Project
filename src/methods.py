@@ -100,9 +100,8 @@ class Methods(ABC):
         Y = self.Y_observed
 
         # Define starting values
-        beta = np.zeros((n_sim, 3))
+        beta = np.full((n_sim, 3), np.nan)
         converged = np.zeros(n_sim, dtype=bool)
-        failed = np.zeros(n_sim, dtype=bool)
         identity = np.eye(3)
 
         # Keep track of repetitions that are still running so that repetitions that are done don't keep running

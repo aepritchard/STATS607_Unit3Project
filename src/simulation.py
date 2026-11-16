@@ -55,7 +55,7 @@ def run_methods_on_chunk(method_class, trt_chunk, Y_chunk, covariate_observed):
     Runs one model method on one chunk of repetitions
     '''
     methods = method_class(trt_chunk, Y_chunk, covariate_observed)
-    return methods.run_method()
+    return methods.run_methods()
 
 class SimulationStudy:
     '''
