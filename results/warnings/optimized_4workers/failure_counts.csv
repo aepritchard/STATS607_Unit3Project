@@ -1,0 +1,5 @@
+experiment,pi_treat,model,n_sample,failure_reason,count
+e3_cutoffs,0.75,logit,100,not converged,577
+e3_cutoffs,0.75,logit,500,not converged,2
+e4_covariate,0.75,logit,100,not converged,1
+e5_joint_dist,0.75,logit,100,not converged,17

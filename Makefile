@@ -1,7 +1,7 @@
 .PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized
 
 LABEL ?= optimized
-WORKERS ?= 2
+WORKERS ?= 1
 PARALLEL_WORKERS ?= 4
 
 # Full label used for every output folder/file: plain for serial, _Nworkers for parallel
