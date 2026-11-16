@@ -113,56 +113,47 @@ class SimulationStudy:
             true_deltas[model] = dgp.true_delta(link=METHOD_CLASSES[model].link)
 
         # Perform methods on experimental data
-        rows = []
-        for repetition in tqdm(repetition_data, desc=scenario_id, unit="rep"):
-            for model in settings['models']:
-                method_class = METHOD_CLASSES[model]
-                start = perf_counter()
-                failure_reason = ""
-                error_message = ""
+        frames = []
+        for model in settings['models']:
+            method_class = METHOD_CLASSES[model]
+            start = perf_counter()
 
-                with warnings.catch_warnings(record=True) as caught:
-                    warnings.simplefilter('always')
-                    try:
-                        methods = method_class(repetition['trt'], repetition['Y_observed'], dgp.Z)
-                        estimates = methods.run_methods()
-                    except Exception as error:
-                        estimates = {"beta1_hat": np.nan, "beta2_hat": np.nan,
-                                     "beta3_hat": np.nan, "plug_in": np.nan,
-                                     "itt": np.nan}
-                        failure_reason = type(error).__name__
-                        error_message = str(error)
+            methods = method_class(repetition_data['trt'], repetition_data["Y_observed"], dgp.Z)
+            estimates = methods.run_methods()
 
-               
+            # Average time per rep
+            avg_seconds_per_rep = (perf_counter() - start)/ self.n_sim
 
-                if failure_reason == "" and len(caught) > 0:
-                    failure_reason = "warning: " + type(caught[0].message).__name__
+            # Get failure reasons
+            conditions = [
+                ~estimates["converged"],
+                np.isnan(estimates["plug_in"]),
+                np.isnan(estimates["itt"]),
+            ]
+            reasons = ["not converged", "plug_in undefined", "itt undefined"]
+            failure_reason = np.select(conditions, reasons, default="")
 
-                # Every warning raised in this rep (including any before an exception)
-                warning_messages = []
-                for caught_warning in caught:
-                    warning_messages.append(f"{type(caught_warning.message).__name__}: {caught_warning.message}")
-                warning_text = " | ".join(warning_messages)
+            # Create one summary row per repetition
+            frame = pd.DataFrame({
+                "study_id": self.study_id,
+                "scenario_id": scenario_id,
+                "experiment": settings["experiment"],
+                "model": model,
+                "sim_index": np.arange(self.n_sim),
+                "n_sample": settings["n_sample"],
+                "pi_treat": settings["pi_treat"],
+                "true_delta": true_deltas[model],
+                "failure_reason": failure_reason,
+                "seconds": avg_seconds_per_rep,
+                "beta1_hat": estimates["beta1_hat"],
+                "beta2_hat": estimates["beta2_hat"],
+                "beta3_hat": estimates["beta3_hat"],
+                "plug_in": estimates["plug_in"],
+                "itt": estimates["itt"],
+            })
+            frames.append(frame)
 
-                row = {
-                    "study_id": self.study_id,
-                    "scenario_id": scenario_id,
-                    "experiment": settings["experiment"],
-                    "model": model,
-                    "sim_index": repetition["sim_index"],
-                    "n_sample": settings["n_sample"],
-                    "pi_treat": settings["pi_treat"],
-                    "true_delta": true_deltas[model],
-                    "failure_reason": failure_reason,
-                    "error_message": error_message,
-                    "n_warnings": len(caught),
-                    "warnings": warning_text,
-                    "seconds": perf_counter() - start,
-                }
-                row.update(estimates)
-                rows.append(row)
-
-        frame = pd.DataFrame(rows)
+        frame = pd.concat(frames, ignore_index=True)
         save_csv(frame, checkpoint)
         logging.info("Completed %s (%d reps)", scenario_id, self.n_sim)
         return frame

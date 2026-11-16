@@ -1,6 +1,7 @@
 import numpy as np
 import statsmodels.api as sm
 from scipy.stats import norm
+from scipy.special import expit
 
 from abc import ABC, abstractmethod
 
@@ -19,11 +20,16 @@ class Methods(ABC):
     @staticmethod
     def check_probability(prob):
         '''
-        Raises an error if prob is not in (0,1)
+        For probabilities not in (0,1), replace by NaN
         '''
-        if prob <= 0 or prob >= 1:
-            raise ValueError(rf"p must be in (0,1), recieved {prob}")
+        prob = np.asarray(prob, dtype=float)
+        prob = np.where((prob <= 0) | (prob >= 1), np.nan, prob)
 
+        # For probability checks for single numbers, return the number
+        if prob.ndim == 0:
+            return float(prob)
+        return prob
+    
     @staticmethod
     @abstractmethod
     def link(prob):
@@ -44,7 +50,7 @@ class Methods(ABC):
         '''
         Conditional probability that Y_i=1 given beta, X_i, Z_i
         '''
-        linear_predictor = beta[0] + beta[1] * trt + beta[2] * covariate_observed
+        linear_predictor = beta[:,0:1] + beta[:,1:2] * trt + beta[:,2:3] * covariate_observed
         return self.inverse_link(linear_predictor)
 
     @abstractmethod
@@ -80,21 +86,74 @@ class Methods(ABC):
         delta_hat = self.link(alpha_treat_hat) - self.link(alpha_control_hat)
         return delta_hat
 
+    def fit_model(self, tol=1e-8, maxiter=40):
+        '''
+        Fits the model for all repetitions using Newton-Raphson
+        '''
+        n_sim, n_sample = self.trt.shape
+
+        # Build 3D design matrix
+        X = np.empty((n_sim, n_sample, 3))
+        X[:,:,0] = 1.0 
+        X[:,:,1] = self.trt
+        X[:,:,2] = self.covariate_observed
+        Y = self.Y_observed
+
+        # Define starting values
+        beta = np.zeros((n_sim, 3))
+        converged = np.zeros(n_sim, dtype=bool)
+        failed = np.zeros(n_sim, dtype=bool)
+        identity = np.eye(3)
+
+        for iteration in range(maxiter):
+            # Linear predictor for each repetition
+            eta = np.einsum("rni,ri->rn", X, beta)
+
+            # Get residuals and weights from each specific model
+            residual, weight = self.residual_and_weight(eta, Y)
+
+            # Get gradient and hessian for each repetition
+            gradient = np.einsum("rni,rn->ri", X, residual)
+            hessian = np.einsum("rni,rn,rnj->rij", X, weight, X)
+
+            # Find repetitions with a singular hessian (these reps will fail to converge)
+            singular = np.linalg.cond(hessian) > 1e12
+            failed = failed | (singular & ~converged)
+
+            # Update all repeititions that are not singular and have not failed
+            still_running = ~converged & ~failed
+            hessian[~still_running] = identity
+            step = np.linalg.solve(hessian, gradient[:,:,None])[:,:,0]
+            step[~still_running] = 0.0
+            beta = beta + step
+
+            # Find repetitions that converged
+            converged = converged | (still_running & (np.max(np.abs(step), axis=1) < tol))
+
+            if not np.any(~converged & ~failed):
+                break
+
+        # For any repeititons that have not converged, give NaN coefficients
+        beta[~converged] = np.nan
+
+        return beta, converged
+
     def run_methods(self):
         '''
         Runs all methods on the stored experiment
         Returns a dict with the logit coefficients, plug-in estimate, and ITT estimate
         '''
-        beta_hat = self.fit_model()
+        beta_hat, converged = self.fit_model()
         delta_tilde = self.plug_in_estimator(beta_hat)
         delta_hat = self.itt_estimate()
 
         results = {
-            "beta1_hat": beta_hat[0],
-            "beta2_hat": beta_hat[1],
-            "beta3_hat": beta_hat[2],
+            "beta1_hat": beta_hat[:,0],
+            "beta2_hat": beta_hat[:,1],
+            "beta3_hat": beta_hat[:,2],
             "plug_in": delta_tilde,
             "itt": delta_hat,
+            "converged": converged
         }
         return results
 
@@ -102,40 +161,36 @@ class Methods_logit(Methods):
 
     @staticmethod
     def link(prob):
-        Methods.check_probability(prob)
+        prob = Methods.check_probability(prob)
         return np.log(prob / (1 - prob))
 
     @staticmethod
     def inverse_link(linear_predictor):
-        return np.exp(linear_predictor) / (1 + np.exp(linear_predictor))
-
-    def fit_model(self):
-        intercept = np.ones(len(self.Y_observed))
-        design_matrix = np.column_stack((intercept, self.trt, self.covariate_observed))
-
-        model = sm.Logit(self.Y_observed, design_matrix)
-        fit = model.fit(disp=0)
-
-        beta_hat = fit.params
-        return beta_hat
+        return expit(linear_predictor)
+    
+    @staticmethod
+    def residual_and_weight(eta, Y):
+        p = expit(eta)
+        residual = Y - p
+        weight = p * (1-p)
+        return residual, weight
 
 class Methods_probit(Methods):
 
     @staticmethod
     def link(prob):
-        Methods.check_probability(prob)
+        prob = Methods.check_probability(prob)
         return norm.ppf(prob)
 
     @staticmethod
     def inverse_link(linear_predictor):
         return norm.cdf(linear_predictor)
 
-    def fit_model(self):
-        intercept = np.ones(len(self.Y_observed))
-        design_matrix = np.column_stack((intercept, self.trt, self.covariate_observed))
-
-        model = sm.Probit(self.Y_observed, design_matrix)
-        fit = model.fit(disp=0)
-
-        beta_hat = fit.params
-        return beta_hat
+    @staticmethod
+    def residual_and_weight(eta, Y):
+        p = norm.cdf(eta)
+        p = np.clip(p, 1e-12, 1 - 1e-12)  # Make sure no 0 values to prevent division problems
+        density = norm.pdf(eta)
+        residual = (Y-p) * density / (p * (1-p))
+        weight = density ** 2 / (p * (1-p))
+        return residual, weight

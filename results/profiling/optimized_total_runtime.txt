@@ -1,0 +1,5 @@
+label: optimized
+n_scenarios: 28
+n_sim: 1000
+total_seconds: 16.5
+total_minutes: 0.27

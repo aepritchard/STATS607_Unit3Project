@@ -40,7 +40,7 @@ def time_all_scenarios():
     for scenario_id, settings in SCENARIOS.items():
         # Use scratch directory to have blank start and throw away results
         with tempfile.TemporaryDirectory() as scratch_dir:
-            study = SimulationStudy({scenario_id: settings}, out_dir=scratch_dir)
+            study = SimulationStudy({scenario_id: settings}, label=LABEL, out_dir=scratch_dir)
 
             start = perf_counter()
             study.run()
