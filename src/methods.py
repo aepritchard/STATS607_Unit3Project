@@ -105,36 +105,44 @@ class Methods(ABC):
         failed = np.zeros(n_sim, dtype=bool)
         identity = np.eye(3)
 
+        # Keep track of repetitions that are still running so that repetitions that are done don't keep running
+        active_index = np.arange(n_sim)
+        X_active = X
+        Y_active = Y
+        beta_active = np.zeros((n_sim, 3))
+
         for iteration in range(maxiter):
             # Linear predictor for each repetition
-            eta = np.einsum("rni,ri->rn", X, beta)
+            eta = np.einsum("rni,ri->rn", X_active, beta_active, optimize=True)
 
             # Get residuals and weights from each specific model
-            residual, weight = self.residual_and_weight(eta, Y)
+            residual, weight = self.residual_and_weight(eta, Y_active)
 
             # Get gradient and hessian for each repetition
-            gradient = np.einsum("rni,rn->ri", X, residual)
-            hessian = np.einsum("rni,rn,rnj->rij", X, weight, X)
-
-            # Find repetitions with a singular hessian (these reps will fail to converge)
-            singular = np.linalg.cond(hessian) > 1e12
-            failed = failed | (singular & ~converged)
+            gradient = np.einsum("rni,rn->ri", X_active, residual, optimize=True)
+            hessian = np.einsum("rni,rn,rnj->rij", X_active, weight, X_active, optimize=True)
 
             # Update all repeititions that are not singular and have not failed
-            still_running = ~converged & ~failed
-            hessian[~still_running] = identity
+            singular = np.linalg.cond(hessian) > 1e12
+            hessian[singular] = identity
             step = np.linalg.solve(hessian, gradient[:,:,None])[:,:,0]
-            step[~still_running] = 0.0
-            beta = beta + step
+            step[singular] = 0.0
+            beta_active = beta_active + step
 
-            # Find repetitions that converged
-            converged = converged | (still_running & (np.max(np.abs(step), axis=1) < tol))
+            # Find new repetitions that converged this iteration, save betas for those reps
+            converged_this_iter = ~singular & (np.max(np.abs(step), axis=1) < tol)
+            converged[active_index[converged_this_iter]] = True
+            beta[active_index[converged_this_iter]] = beta_active[converged_this_iter]
 
-            if not np.any(~converged & ~failed):
+            # Drop repetitions that have converged or are singular for future iterations
+            keep = ~converged_this_iter & ~singular
+            if not np.any(keep):
                 break
-
-        # For any repeititons that have not converged, give NaN coefficients
-        beta[~converged] = np.nan
+            if not np.all(keep):
+                active_index = active_index[keep]
+                X_active = X_active[keep]
+                Y_active = Y_active[keep]
+                beta_active = beta_active[keep]
 
         return beta, converged
 
