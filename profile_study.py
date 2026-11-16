@@ -17,13 +17,19 @@ import sys
 
 # Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
 if len(sys.argv) > 1:
-    LABEL = sys.argv[1]
+    label = sys.argv[1]
 else:
-    LABEL = "baseline"
+    label = "baseline"
+
+# Number of workers for parallization comes from Makefile
+if len(sys.argv) > 2:
+    N_WORKERS = int(sys.argv[2])
+    label = label + "_" + str(N_WORKERS) + "workers"
+else:
+    N_WORKERS = 1
     
 PROFILE_DIR = Path("results/profiling")
 
-# Profile experiment 1 w/ n 5000
 def profile_experiment_1():
     PROFILE_DIR.mkdir(parents=True, exist_ok=True)
     SCENARIO_ID = "e1_n5000"
@@ -31,12 +37,12 @@ def profile_experiment_1():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(scenarios_to_profile, label=LABEL, out_dir = scratch_dir)
+        study = SimulationStudy(scenarios_to_profile, label=label, n_workers=N_WORKERS, out_dir = scratch_dir)
 
         with Profiler() as profiler:
             study.run()
 
-    file_stem = f"{LABEL}_{SCENARIO_ID}_profile"
+    file_stem = f"{label}_{SCENARIO_ID}_profile"
 
     # Create interactive flame graph
     html_path = PROFILE_DIR / f"{file_stem}.html"
@@ -52,7 +58,7 @@ def profile_experiment_1():
     profiler.last_session.save(session_path)
 
     logging.info("Profiled %s (%s) in %.1f seconds",
-                 SCENARIO_ID, LABEL, profiler.last_session.duration)
+                 SCENARIO_ID, label, profiler.last_session.duration)
     logging.info("Profile written to %s", PROFILE_DIR)
 
 # Time the entire simulation study
@@ -61,22 +67,22 @@ def time_simulation_study():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(SCENARIOS, label=LABEL, out_dir=scratch_dir)
+        study = SimulationStudy(SCENARIOS, label=label, out_dir=scratch_dir)
 
         start = perf_counter()
         study.run()
         total_seconds = perf_counter() - start
 
     # Save total runtime
-    runtime_path = PROFILE_DIR / f"{LABEL}_total_runtime.txt"
+    runtime_path = PROFILE_DIR / f"{label}_total_runtime.txt"
     with open(runtime_path, "w", encoding="utf-8") as f:
-        f.write(f"label: {LABEL}\n")
+        f.write(f"label: {label}\n")
         f.write(f"n_scenarios: {len(SCENARIOS)}\n")
         f.write(f"n_sim: {study.n_sim}\n")
         f.write(f"total_seconds: {total_seconds:.1f}\n")
         f.write(f"total_minutes: {total_seconds / 60:.2f}\n")
 
-    logging.info("Entire study (%s) took %.1f seconds", LABEL, total_seconds)
+    logging.info("Entire study (%s) took %.1f seconds", label, total_seconds)
     logging.info("Total runtime written to %s", runtime_path)
 
 if __name__ == "__main__":

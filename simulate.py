@@ -12,9 +12,18 @@ import sys
 
 # Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
 if len(sys.argv) > 1:
-    LABEL = sys.argv[1]
+    label = sys.argv[1]
 else:
-    LABEL = "baseline"
+    label = "baseline"
 
-study = SimulationStudy(SCENARIOS, label=LABEL)
-study.run()
+# Number of workers for parallization comes from Makefile
+if len(sys.argv) > 2:
+    N_WORKERS = int(sys.argv[2])
+    label = label + "_" + str(N_WORKERS) + "workers"
+else:
+    N_WORKERS = 1
+
+
+if __name__ == "__main__":
+    study = SimulationStudy(SCENARIOS, label=label, n_workers=N_WORKERS)
+    study.run()

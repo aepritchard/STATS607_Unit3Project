@@ -12,12 +12,19 @@ import sys
 
 # Label comes from the Makefile (make <target> LABEL=...); defaults to baseline
 if len(sys.argv) > 1:
-    LABEL = sys.argv[1]
+    label = sys.argv[1]
 else:
-    LABEL = "baseline"
+    label = "baseline"
 
-runs_file = Path("results/raw") / LABEL / "runs.csv"
-out_dir = Path("results/warnings") / LABEL
+# Number of workers for parallization comes from Makefile
+if len(sys.argv) > 2:
+    N_WORKERS = int(sys.argv[2])
+    label = label + "_" + str(N_WORKERS) + "workers"
+else:
+    N_WORKERS = 1
+
+runs_file = Path("results/raw") / label / "runs.csv"
+out_dir = Path("results/warnings") / label
 out_dir.mkdir(parents=True, exist_ok=True)
 
 runs = pd.read_csv(runs_file)
