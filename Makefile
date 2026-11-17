@@ -56,7 +56,7 @@ stability:
 
 # Regression test (compare baseline and optimized output)
 regression_test:
-	pytest regression_test.py
+	PYTHONPATH=src python3 -m pytest regression_test.py -rs
 
 # Remove generated files
 clean_optimized:
