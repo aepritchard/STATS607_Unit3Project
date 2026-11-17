@@ -1,0 +1,8 @@
+label,n_scenarios,n_sim,total_seconds,total_minutes
+baseline,28,1000,25.5,0.42
+optimized_1workers,28,1000,8.8,0.15
+optimized_2workers_2workers,28,1000,8.0,0.13
+optimized_2workers,28,1000,7.6,0.13
+optimized_4workers_4workers,28,1000,6.7,0.11
+optimized_4workers,28,1000,6.8,0.11
+optimized,28,1000,9.2,0.15

@@ -240,9 +240,8 @@ def test_performance_sd_matches_baseline(version, scenario_id, model, estimator)
     assert p_value > ALPHA, f"F = {F_score:.3f}, p = {p_value:.4f}"
 
 ################################################################## 
-#  Experiment 4 fails the above test for matching SD, examine why by considering if this is because
-#   (1) Clipping the probability cut-offs creating noisy estimates in the optimized version
-#           caused the optimized version to use fewer valid reps
+#  Experiment 4 fails the above test for matching SD, examine this
+#       by considering a KS test to compare distributions
 ##################################################################
 RAW_DIR = Path("results/raw")
 E4_ESTIMATORS = ["beta1_hat", "beta2_hat", "beta3_hat", "plug_in", "itt"]
@@ -282,3 +281,17 @@ def test_e4_distribution_ks(version, scenario_id, estimator):
 
     result = stats.ks_2samp(baseline_estimates, optimized_estimates)
     assert result.pvalue > ALPHA, f"KS statistic = {result.statistic:.3f}, p = {result.pvalue:.4f}"
+
+################################################################## 
+#  Check that parallel and serial results match exactly
+##################################################################
+PARALLEL_VERSIONS = [version for version in versions if version.endswith("workers")]
+
+@pytest.mark.parametrize("parallel_version", PARALLEL_VERSIONS)
+def test_parallel_matches_serial(parallel_version):
+    # Remove runtime since this will vary b/w versions
+    serial_runs = all_version_runs['optimized'].drop(columns=['seconds'])
+    parallel_runs = all_version_runs[parallel_version].drop(columns=['seconds'])
+
+    pd.testing.assert_frame_equal(serial_runs, parallel_runs,
+                                  check_exact=False, rtol=1e-10, atol=1e-12)

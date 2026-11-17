@@ -24,7 +24,6 @@ else:
 # Number of workers for parallization comes from Makefile
 if len(sys.argv) > 2:
     N_WORKERS = int(sys.argv[2])
-    label = label + "_" + str(N_WORKERS) + "workers"
 else:
     N_WORKERS = 1
     

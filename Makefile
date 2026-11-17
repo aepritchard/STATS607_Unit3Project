@@ -1,4 +1,4 @@
-.PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized regression_test
+.PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized regression_test benchmark
 
 LABEL ?= optimized
 WORKERS ?= 1
@@ -11,7 +11,7 @@ else
 RUN_LABEL = $(LABEL)_$(WORKERS)workers
 endif
 
-all: setup simulate analyze figures profile complexity stability
+all: setup simulate analyze figures profile complexity stability-check
 
 # Set-up
 setup: .setup_complete
@@ -38,10 +38,6 @@ figures:
 	PYTHONPATH=src python3 -c "from publication_figures import run_publication_figures; run_publication_figures(label='$(RUN_LABEL)')"
 	PYTHONPATH=src python3 -c "from diagnostic_figures import run_diagnostic_figures; run_diagnostic_figures(label='$(RUN_LABEL)')"
 
-# Run test suite
-test:
-	PYTHONPATH=src python3 -m pytest tests/
-
 # Profile one experiment, time entire study
 profile:
 	PYTHONPATH=src python3 profile_study.py $(RUN_LABEL) $(WORKERS)
@@ -51,12 +47,16 @@ complexity:
 	PYTHONPATH=src python3 complexity_study.py $(RUN_LABEL) $(WORKERS)
 
 # Numerical stability (failure reasons across conditions)
-stability:
+stability-check:
 	PYTHONPATH=src python3 stability_study.py $(RUN_LABEL)
+
+# Compare runtimes across all saved versions using saved results
+benchmark:
+	PYTHONPATH=src python3 benchmark_study.py
 
 # Regression test (compare baseline and optimized output)
 regression_test:
-	PYTHONPATH=src python3 -m pytest regression_test.py -rs
+	PYTHONPATH=src python3 -m pytest test_regression.py -rs
 
 # Remove generated files
 clean_optimized:
