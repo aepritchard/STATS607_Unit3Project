@@ -1,4 +1,4 @@
-.PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized
+.PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized regression_test
 
 LABEL ?= optimized
 WORKERS ?= 1
@@ -53,6 +53,10 @@ complexity:
 # Numerical stability (failure reasons across conditions)
 stability:
 	PYTHONPATH=src python3 stability_study.py $(RUN_LABEL)
+
+# Regression test (compare baseline and optimized output)
+regression_test:
+	pytest regression_test.py
 
 # Remove generated files
 clean_optimized:
