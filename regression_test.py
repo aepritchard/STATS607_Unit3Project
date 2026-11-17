@@ -1,9 +1,13 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from scipy import stats
 import pytest
 
-###################### Check table output from baseline to new optimized versions
+# Baseline and optimized use the same random streams to sample from the population
+#       They only differ in treatment assignment (not the same random streams)
+#       So, results should be similar, but not identical
+
 # Import data
 versions = ["baseline", "optimized", "optimized_2workers", "optimized_4workers"]
 all_version_tables = {}
@@ -23,9 +27,9 @@ for version in versions:
                       'table1': table1}
     all_version_tables[version] = version_tables
 
-# Baseline and optimized use the same random streams to sample from the population
-#       They only differ in treatment assignment (not the same random streams)
-#       So, results should be similar, but not identical
+################################################################## 
+#  Check table output from baseline to new optimized versions
+################################################################## 
 
 TABLE1_ESTIMATORS = ['beta1_hat', 'beta2_hat', 'beta3_hat', 'plug_in']
 
@@ -79,10 +83,20 @@ def test_table1_estimators_are_close_to_baseline(optimized_version):
         optimized_means = optimized_table1[f"{estimator}_mean"].to_numpy()
         optimized_sds = optimized_table1[f"{estimator}_sd"].to_numpy()
 
-        # Means should be similar, use mean estimates, n_valid, and SDs to form 2-sample Z-tests
+        # Test similarity of means w/ Z-scores
         numerators = baseline_means - optimized_means
         denominators = np.sqrt(baseline_sds**2/baseline_n_valid + optimized_sds**2/optimized_n_valid)
         Z_scores = numerators / denominators
-        assert np.all(np.abs(Z_scores) < 3), f"{estimator}: Z = {Z_scores}"
+        Z_p_values = 2 * stats.norm.sf(np.abs(Z_scores))
+        assert np.all(Z_p_values > 0.0005), f"{estimator}: Z = {Z_scores}, p = {Z_p_values}"
 
+        # Test similarity of SDs w/ F-test
+        F_scores = baseline_sds**2 / optimized_sds**2
+        numerator_dfs = baseline_n_valid - 1
+        denominator_dfs = optimized_n_valid - 1
+        lower_tail = stats.f.cdf(F_scores, numerator_dfs, denominator_dfs)
+        upper_tail = stats.f.sf(F_scores, numerator_dfs, denominator_dfs)
+        p_values = 2 * np.minimum(lower_tail, upper_tail)
+
+        assert np.all(p_values > 0.0005), f"{estimator}: F = {F_scores}, p = {p_values}"
         
