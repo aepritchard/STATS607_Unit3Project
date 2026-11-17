@@ -16,7 +16,7 @@ from metrics import get_valid_reps
 #       So, results should be similar, but not identical
 
 # Import data
-versions = ["baseline", "optimized", "optimized_2workers", "optimized_4workers"]
+versions = ["baseline", "optimized", "optimized_2cores", "optimized_4cores"]
 all_version_tables = {}
 for version in versions:
     # Import all tables
@@ -285,7 +285,7 @@ def test_e4_distribution_ks(version, scenario_id, estimator):
 ################################################################## 
 #  Check that parallel and serial results match exactly
 ##################################################################
-PARALLEL_VERSIONS = [version for version in versions if version.endswith("workers")]
+PARALLEL_VERSIONS = [version for version in versions if version.endswith("cores")]
 
 @pytest.mark.parametrize("parallel_version", PARALLEL_VERSIONS)
 def test_parallel_matches_serial(parallel_version):

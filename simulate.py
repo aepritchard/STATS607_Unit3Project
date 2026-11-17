@@ -17,11 +17,11 @@ else:
     label = "baseline"
 
 if len(sys.argv) > 2:
-    N_WORKERS = int(sys.argv[2])
+    N_CORES = int(sys.argv[2])
 else:
-    N_WORKERS = 1
+    N_CORES = 1
 
 
 if __name__ == "__main__":
-    study = SimulationStudy(SCENARIOS, label=label, n_workers=N_WORKERS)
+    study = SimulationStudy(SCENARIOS, label=label, n_cores=N_CORES)
     study.run()

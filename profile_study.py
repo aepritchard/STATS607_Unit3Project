@@ -21,11 +21,11 @@ if len(sys.argv) > 1:
 else:
     label = "baseline"
 
-# Number of workers for parallization comes from Makefile
+# Number of cores for parallization comes from Makefile
 if len(sys.argv) > 2:
-    N_WORKERS = int(sys.argv[2])
+    N_CORES = int(sys.argv[2])
 else:
-    N_WORKERS = 1
+    N_CORES = 1
     
 PROFILE_DIR = Path("results/profiling")
 
@@ -36,7 +36,7 @@ def profile_experiment_1():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(scenarios_to_profile, label=label, n_workers=1, out_dir=scratch_dir)
+        study = SimulationStudy(scenarios_to_profile, label=label, n_cores=1, out_dir=scratch_dir)
 
         with Profiler() as profiler:
             study.run()
@@ -66,7 +66,7 @@ def time_simulation_study():
 
     # Use scratch directory to have blank start and throw away results
     with tempfile.TemporaryDirectory() as scratch_dir:
-        study = SimulationStudy(SCENARIOS, label=label, n_workers=N_WORKERS, out_dir=scratch_dir)
+        study = SimulationStudy(SCENARIOS, label=label, n_cores=N_CORES, out_dir=scratch_dir)
 
         start = perf_counter()
         study.run()

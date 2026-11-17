@@ -74,7 +74,7 @@ def summarize_total_runtimes():
 def plot_runtime_vs_n():
     '''
     Plots runtime of one full scenario vs n for every saved version in COMPLEXITY_DIR
-    Each *_runtimes.csv file is one version, named by the file name (e.g. optimized_4workers)
+    Each *_runtimes.csv file is one version, named by the file name 
     One panel per experiment / proportion treated, one color per version
     Log-log axes, dots connected
 

@@ -6,45 +6,30 @@ The first step was to change the treatment assignment process. After the true po
 
 *Baseline Code:*
 ```
-def generate_repetitions(self):
-        '''
-        Generate experiements
-        '''
-        self.generate_outcomes()
+all_repetitions = []
+for sim_index in range(self.n_sim):
+    trt_assignment = self.generate_treatment()
+    Y_observed = trt_assignment * self.Y_treatment + (1-trt_assignment) * self.Y_control
 
-        all_repetitions = []
-        for sim_index in range(self.n_sim):
-            trt_assignment = self.generate_treatment()
-            Y_observed = trt_assignment * self.Y_treatment + (1-trt_assignment) * self.Y_control
-
-            repetition = {
-                "experiment": self.experiment,
-                "sim_index": sim_index,
-                "trt": trt_assignment,
-                "Y_observed": Y_observed
-            }
-            all_repetitions.append(repetition)
-
-        return all_repetitions
+    repetition = {
+        "experiment": self.experiment,
+        "sim_index": sim_index,
+        "trt": trt_assignment,
+        "Y_observed": Y_observed
+    }
+    all_repetitions.append(repetition)
 ```
 
 *Optimized Code:*
 ```
-def generate_repetitions(self):
-        '''
-        Generate experiements
-        '''
-        self.generate_outcomes()
-        trt_assignments = self.generate_treatment()
-        Y_observed = trt_assignments * self.Y_treatment + (1 - trt_assignments) * self.Y_control
+trt_assignments = self.generate_treatment()
+Y_observed = trt_assignments * self.Y_treatment + (1 - trt_assignments) * self.Y_control
 
-        all_repetitions = {
-            "experiment": self.experiment,
-            "trt": trt_assignments,
-            "Y_observed": Y_observed
-        }
-
-        return all_repetitions
+all_repetitions = {
+    "experiment": self.experiment,
+    "trt": trt_assignments,
+    "Y_observed": Y_observed
+}
 ```
 
 ## Change in model fitting
@@ -207,7 +192,7 @@ The full interactive flame-graphs and tree calls for the profiles of all version
 
 A log-log plot of runtime vs n was used to compare the runtime between different code versions. When compared to the baseline in blue, the vectorized version (labeled optimized) in red shows a clear improvement in runtime for all sample sizes. The parallel versions with 2 workers (optimized_2workers in orange) and with 4 workers (optimized_4workers in green) showed an increased run-time for small sample sizes compared to the baseline; however, the parallel runtimes were very similar to that of the serial vectorized version for larger sample sizes. Both parallel versions had very similar runtimes, but especially at small sample sizes, the runtime was somewhat larger when using 4 workers than when using 2 workers.
 
-![Runtime vs n for baseline and optimized versions](../results/complexity/runtime_vs_n_all_versions.png)
+![Runtime vs n for baseline and optimized versions](../results/benchmark/runtime_vs_n_all_versions.png)
 
 ## Stability
 
@@ -221,3 +206,5 @@ First, I implemented a test that the true population values for Table 1 were the
 This process was than generalized to test the means and SDs of estimators across all repetitions for each experiment, method, and sample size. The Z-tests indicated that the estimator means were not statistically different between the baseline and optimized versions for all experiments and methods. Additionally, the F-tests indicated that the estimator SDs were not statistically different between the baseline and optimized versions for experiments 1, 2, 3, and 5. However, this was not the case for experiment 4. To investigate this further, I applied a Kolmogorov–Smirnov test to the raw estimates for each sample size in experiment 4 to test if the estimates came from the same distribution. This indicated that all experiment 4 estimates between the baseline and optimized versions were not from statistically different distributions. So while the SDs were statistically different between the baseline and optimized versions, this may be due to some large values influencing the standard deviation.
 
 Finally, the largest difference in the code between the baseline and optimized versions was my implementation of the vectorized Newton-Rhapson method to replace the pre-built statsmodels functions. To test if the vectorized model fitting methods I implemented produced similar results to the pre-built statsmodels, I used both methods on the same test data and compared the estimates across multiple repetitions. All repeitions had near equal estimates obtained between both methods, indicating that the vectorized Newton-Rhapson method was consistent with the pre-built statsmodel functions used in the baseline version.
+
+# Lessons Learned

@@ -1,14 +1,14 @@
 .PHONY: all setup simulate parallel analyze figures test profile complexity stability-check clean_optimized regression_test benchmark
 
-LABEL ?= optimized
-WORKERS ?= 1
-PARALLEL_WORKERS ?= 4
+RUN_LABEL ?= optimized
+CORES ?= 1
+PARALLEL_CORES ?= 2
 
 # Full label used for every output folder/file: plain for serial, _Nworkers for parallel
-ifeq ($(WORKERS),1)
-RUN_LABEL = $(LABEL)
+ifeq ($(PARALLEL_CORES),1)
+PARALLEL_RUN_LABEL = $(RUN_LABEL)
 else
-RUN_LABEL = $(LABEL)_$(WORKERS)workers
+PARALLEL_RUN_LABEL = $(RUN_LABEL)_$(PARALLEL_CORES)cores
 endif
 
 all: setup simulate analyze figures profile complexity stability-check
@@ -23,11 +23,15 @@ setup: .setup_complete
 
 # Run all scenarios and save raw results to results/raw/<RUN_LABEL>/
 simulate:
-	PYTHONPATH=src python3 simulate.py $(RUN_LABEL) $(WORKERS)
+	PYTHONPATH=src python3 simulate.py $(RUN_LABEL) $(CORES)
 
-# Run all scenarios in parallel
+# Run all scenarios in parallel, run profiling and complexity
 parallel:
-	$(MAKE) simulate WORKERS=$(PARALLEL_WORKERS)
+	$(MAKE) simulate RUN_LABEL=$(PARALLEL_RUN_LABEL) CORES=$(PARALLEL_CORES)
+	$(MAKE) analyze RUN_LABEL=$(PARALLEL_RUN_LABEL) CORES=$(PARALLEL_CORES)
+	$(MAKE) profile RUN_LABEL=$(PARALLEL_RUN_LABEL) CORES=$(PARALLEL_CORES)
+	$(MAKE) complexity RUN_LABEL=$(PARALLEL_RUN_LABEL) CORES=$(PARALLEL_CORES)
+	$(MAKE) stability-check RUN_LABEL=$(PARALLEL_RUN_LABEL) CORES=$(PARALLEL_CORES)
 
 # Compute performance measures from results/raw/<RUN_LABEL>/runs.csv
 analyze:
@@ -40,15 +44,15 @@ figures:
 
 # Profile one experiment, time entire study
 profile:
-	PYTHONPATH=src python3 profile_study.py $(RUN_LABEL) $(WORKERS)
+	PYTHONPATH=src python3 profile_study.py $(RUN_LABEL) $(CORES)
 
 # Runtime vs sample size
 complexity:
-	PYTHONPATH=src python3 complexity_study.py $(RUN_LABEL) $(WORKERS)
+	PYTHONPATH=src python3 complexity_study.py $(RUN_LABEL) $(CORES)
 
 # Numerical stability (failure reasons across conditions)
 stability-check:
-	PYTHONPATH=src python3 stability_study.py $(RUN_LABEL)
+	PYTHONPATH=src python3 stability_study.py $(RUN_LABEL) $(CORES)
 
 # Compare runtimes across all saved versions using saved results
 benchmark:
@@ -61,4 +65,5 @@ regression_test:
 # Remove generated files
 clean_optimized:
 	rm -rf results/raw/optimized* results/tables/optimized* results/figures/optimized*
+	rm -rf results/profiling/optimized* results/complexity/optimized*
 	rm -f .*complete
