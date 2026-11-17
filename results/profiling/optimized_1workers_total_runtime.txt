@@ -1,5 +1,5 @@
 label: optimized_1workers
 n_scenarios: 28
 n_sim: 1000
-total_seconds: 8.9
+total_seconds: 8.8
 total_minutes: 0.15
