@@ -59,11 +59,12 @@ benchmark:
 	PYTHONPATH=src python3 benchmark_study.py
 
 # Regression test (compare baseline and optimized output)
-regression_test:
+regression-test:
 	PYTHONPATH=src python3 -m pytest test_regression.py -rs
 
 # Remove generated files
 clean_optimized:
 	rm -rf results/raw/optimized* results/tables/optimized* results/figures/optimized*
 	rm -rf results/profiling/optimized* results/complexity/optimized*
+	rm -rf results/warnings/optimized*
 	rm -f .*complete

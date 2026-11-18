@@ -39,7 +39,7 @@ for version in versions:
 ################################################################## 
 
 TABLE1_ESTIMATORS = ['beta1_hat', 'beta2_hat', 'beta3_hat', 'plug_in']
-ALPHA = 0.0005  # Standard 0.05 p-value cut-off w/ Bonferroni correction for number of comparisons
+ALPHA = 0.0005  
 
 def get_n_valid(version, model="logit", experiment = None, scenario_id_contains = None):
     '''
