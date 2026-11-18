@@ -1,4 +1,4 @@
-# STATS 607 Unit Project 
+# STATS 607 Unit Project 3
 
 ## Project Description:
 The unit 2 project reproduced the analysis of the paper "Randomization Does Not Justify Logistic Regression" (Freedman 2008). The simulation examines the use of the logit model under a non-logit data generating mechanism to examine the performance of estimators of the differential log odds of success. Experiments are used to compare the results under different sample sizes, number of treated, data generating distributions, outcome definitions, and under a probit model.
